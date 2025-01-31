@@ -125,7 +125,7 @@ public:
     promise(){}
     promise(promise&&o):state_(o.state_){o.state_ = nullptr;}
     void operator=(promise&&other){
-        if(state_->allive.load(std::memory_order_acquire)) not_eq 1){
+        if(state_->alive_.load(std::memory_order_acquire) not_eq 1){
             throw std::logic_error("future still alive, cant move to this promise");
         }
         delete state_;
@@ -178,6 +178,7 @@ template<cvk::FutureValue T>
 auto operator co_await(cvk::future<T> future) noexcept
     requires(not std::is_reference_v<T>)
 {
+    tl::expected<T,std::exception_ptr> result;
     struct awaiter : cvk::future<T>
     {
         bool await_ready()noexcept{return false;}
@@ -188,7 +189,7 @@ auto operator co_await(cvk::future<T> future) noexcept
             });
         }
         T await_resume(){
-            return this->get();
+            return result;
         }
     };
     // implicit move constructor
