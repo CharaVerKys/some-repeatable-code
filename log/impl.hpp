@@ -5,6 +5,7 @@
 #include "logenum.hpp"
 #include <cassert>
 #include <condition_variable>
+#include <cstring>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -28,7 +29,9 @@ struct log_impl{
                 const auto& pair = queue.front();
                                 // ? probably main log (should be first)
                 *streams.at_tryFirst(1, pair.first) << pair.second;
-                //todo check invalid write (errno)
+                if(errno not_eq 0){
+                    std::cerr << "error during logging: " << std::strerror(errno) << "\n"; 
+                }
                 queue.pop();
             }
         }
