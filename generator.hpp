@@ -1,14 +1,18 @@
 #pragma once
+
 #include <coroutine>
 #include <exception>
 #include <iterator>
 #include <optional>
+#include <cassert>
+
 namespace cvk{
 
 template<typename T>
 class
 [[nodiscard("discard generator")]]
 generator {
+public:
     struct promise_type {
         std::optional<T> current_value;
 
@@ -31,6 +35,9 @@ generator {
 
     struct iterator {
         std::coroutine_handle<promise_type> handle;
+        // using difference_type = std::ptrdiff_t;
+        // using value_type = T;
+        // using iterator_concept = std::input_iterator_tag;
 
         iterator& operator++() noexcept {
             handle.resume();
@@ -42,8 +49,8 @@ generator {
             return *handle.promise().current_value;
         }
 
-        bool operator!=(std::default_sentinel_t) const noexcept {
-            return handle && not handle.done();
+        bool operator==(std::default_sentinel_t) const noexcept {
+            return not handle and handle.done();
         }
     };
 
