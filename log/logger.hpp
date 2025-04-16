@@ -14,6 +14,9 @@ public:
         static Logger singleton;
         return &singleton;
     } 
+    void setLogDir(std::filesystem::path&& p){
+        logDir = std::move(p);
+    }
     void init(){
         cvk::flat_map<log::to, std::shared_ptr<std::ofstream>> streams;
         std::string time = __getStringFromCurrentTime(false);
@@ -37,11 +40,11 @@ public:
         const std::tm *tm = std::localtime(&now_c);
         std::ostringstream oss;
         if(forLog){
-            oss << std::setw(2) << std::setfill('0') << tm->tm_sec << ":"
-                << std::setw(2) << std::setfill('0') << tm->tm_min << "-"
-                << std::setw(2) << std::setfill('0') << tm->tm_hour;
-        }else{
             oss << std::setw(2) << std::setfill('0') << tm->tm_hour << ":"
+                << std::setw(2) << std::setfill('0') << tm->tm_min  << ":"
+                << std::setw(2) << std::setfill('0') << tm->tm_sec;
+        }else{
+            oss << std::setw(2) << std::setfill('0') << tm->tm_hour << "-"
                 << std::setw(2) << std::setfill('0') << tm->tm_mday << "-"
                 << std::setw(2) << std::setfill('0') << tm->tm_mon+1;
         }

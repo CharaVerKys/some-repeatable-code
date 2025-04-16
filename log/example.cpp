@@ -3,6 +3,8 @@
 
 using namespace std::chrono_literals;
 int main(){
+    std::filesystem::create_directory("log");
+    Logger::instance()->setLogDir("log");
     Logger::instance()->init();
     cvk::write(log::to::main) << log::lvl::good << "log start";
     cvk::write(log::to::main) << "norm";
