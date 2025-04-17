@@ -51,11 +51,13 @@ public:
 
         T* operator->() const {
             assert(not handle.done());
-            return *handle.promise().current_value;
+            // yeah also invalidation of pointer after iteration
+            return &handle.promise().current_value.value();
         }
 
         bool operator==(std::default_sentinel_t) const noexcept {
-            return not handle and handle.done();
+            assert(handle);
+            return handle.done();
         }
     };
 
