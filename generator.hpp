@@ -49,6 +49,11 @@ public:
             return *handle.promise().current_value;
         }
 
+        T* operator->() const {
+            assert(not handle.done());
+            return *handle.promise().current_value;
+        }
+
         bool operator==(std::default_sentinel_t) const noexcept {
             return not handle and handle.done();
         }
