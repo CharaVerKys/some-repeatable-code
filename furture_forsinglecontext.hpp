@@ -178,19 +178,23 @@ template<cvk::FutureValue T>
 auto operator co_await(cvk::future<T> future) noexcept
     requires(not std::is_reference_v<T>)
 {
-    tl::expected<T,std::exception_ptr> result;
     struct awaiter : cvk::future<T>
     {
         bool await_ready()noexcept{return false;}
         void await_suspend(std::coroutine_handle<>cont){
-            future.subscribe([this,cont](tl::expected<T,std::exception_ptr>&& expected){
+            subscribe([this,cont](tl::expected<T,std::exception_ptr>&& expected){
                 result = std::move(expected);
                 cont();
             });
         }
         T await_resume(){
-            return result;
+            if(result.has_value()){
+                return std::move(result.value());
+            }
+            std::rethrow_exception(result.error());
         }
+      private:
+        tl::expected<T,std::exception_ptr> result;
     };
     // implicit move constructor
     return awaiter { std::move(future) };
