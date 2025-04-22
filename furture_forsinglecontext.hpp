@@ -172,17 +172,19 @@ public:
         }
     }
 };
+}//? namespace cvk
 
-// like std example
 template<cvk::FutureValue T>
 auto operator co_await(cvk::future<T> future) noexcept
     requires(not std::is_reference_v<T>)
 {
     struct awaiter : cvk::future<T>
     {
+        //? implicit move constructor not works
+        awaiter(cvk::future<T>&&fut):cvk::future<T>(std::move(fut)){}
         bool await_ready()noexcept{return false;}
         void await_suspend(std::coroutine_handle<>cont){
-            subscribe([this,cont](tl::expected<T,std::exception_ptr>&& expected){
+            cvk::future<T>::subscribe([this,cont](tl::expected<T,std::exception_ptr>&& expected){
                 result = std::move(expected);
                 cont();
             });
@@ -196,11 +198,8 @@ auto operator co_await(cvk::future<T> future) noexcept
       private:
         tl::expected<T,std::exception_ptr> result;
     };
-    // implicit move constructor
-    return awaiter { std::move(future) };
+    return awaiter{std::move(future)};
 }
-}//? namespace cvk
-
 
 // like std example
 template <cvk::FutureValue T, typename... Args>

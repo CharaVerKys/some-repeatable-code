@@ -79,5 +79,9 @@ public:
         }
         return vals[binarySearch(key)];
     }
+    //for iterations/copy
+    std::vector<V> const& getUnderlineValueVector(){
+        return vals;
+    }
 };
 }// namespace cvk
