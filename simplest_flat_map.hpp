@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <stdexcept>
 #include <vector>
 namespace cvk{
@@ -13,7 +14,7 @@ template<key K, value V>
 class flat_map{
     std::vector<K> keys; // all implicit constructors looks ok 
     std::vector<V> vals;
-    size_t binarySearch(const K& key){
+    std::optional<size_t> binarySearch(const K& key){
         assert(not keys.empty());
         size_t lowId = 0;
         size_t highId = keys.size()-1;
@@ -36,12 +37,19 @@ class flat_map{
                 break;
             }
         }
-        throw std::out_of_range("no value with this key");
+        return std::nullopt;
     }
 public:
     flat_map(){}
     V& at(const K& key){
-        return vals[binarySearch(key)];
+        auto opt = binarySearch(key);
+        if(not opt){
+            throw std::out_of_range("no value with this key");
+        }
+        return vals[*opt];
+    }
+    bool contains(const K& key){
+        return binarySearch(key).has_value();
     }
     void insert(const K& key, const V& value){
         size_t index = 0;
@@ -65,7 +73,11 @@ public:
     }
     void remove(const K& key){
         if(keys.empty()){throw std::runtime_error("flat_map is empty, nothing to remove");}
-        int index = binarySearch(key);
+        auto opt = binarySearch(key);
+        if(not opt){
+            throw std::out_of_range("no value with this key");
+        }
+        int index = opt.value();
         vals.erase(vals.begin()+index);
         keys.erase(keys.begin()+index);
     }
@@ -77,7 +89,11 @@ public:
                 return vals[i];
             }
         }
-        return vals[binarySearch(key)];
+        auto opt = binarySearch(key);
+        if(not opt){
+            throw std::out_of_range("no value with this key");
+        }
+        return vals[*opt];
     }
     //for iterations/copy
     std::vector<V> const& getUnderlineValueVector(){
