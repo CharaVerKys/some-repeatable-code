@@ -3,6 +3,7 @@
 #include <optional>
 #include <stdexcept>
 #include <vector>
+#include <cassert>
 namespace cvk{
 template <typename T>
 concept key = true;
@@ -70,6 +71,20 @@ public:
         // ?                (index 3)
         // ?     0 1 2 3 4
         // ?            new index 3 is new value
+    }
+    void insert(const K& key, V&& value){
+        size_t index = 0;
+        while(index < keys.size()){
+            if(key <=> keys[index] == std::strong_ordering::greater){
+                ++index;
+            }else if(key <=> keys[index] == std::strong_ordering::equal){
+                throw std::runtime_error("this key already exist");
+            }else if(key <=> keys[index] == std::strong_ordering::less){
+                break;
+            }
+        }
+        vals.insert(vals.begin()+index, std::move(value));
+        keys.insert(keys.begin()+index, key);
     }
     void remove(const K& key){
         if(keys.empty()){throw std::runtime_error("flat_map is empty, nothing to remove");}
