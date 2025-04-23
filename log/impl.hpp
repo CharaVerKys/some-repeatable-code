@@ -14,11 +14,11 @@
 #include <flat_map.hpp>
 
 struct log_impl{
-    std::queue<std::pair<log::to,std::string>> queue;
+    std::queue<std::pair<cvk::log::to,std::string>> queue;
     std::jthread thread;
     std::mutex mutex;
     std::condition_variable cond_var;
-    void work(std::stop_token token, cvk::flat_map<log::to,std::shared_ptr<std::ofstream>> streams){
+    void work(std::stop_token token, cvk::flat_map<cvk::log::to,std::shared_ptr<std::ofstream>> streams){
         while(not token.stop_requested()){
             std::unique_lock lock(mutex);
             cond_var.wait(lock, [this, &token](){//notify only on new task in queue
@@ -37,7 +37,7 @@ struct log_impl{
         }
         std::cout << "end log" <<std::endl;
     }
-    void start(const cvk::flat_map<log::to,std::shared_ptr<std::ofstream>>& streams){
+    void start(const cvk::flat_map<cvk::log::to,std::shared_ptr<std::ofstream>>& streams){
         auto withThis = std::bind_front(&log_impl::work, this);
         thread = std::jthread(withThis, streams);
     }
@@ -46,7 +46,7 @@ struct log_impl{
         cond_var.notify_one();
         thread.join();
     }
-    void push(const log::to& target, const std::string& string){
+    void push(const cvk::log::to& target, const std::string& string){
         std::unique_lock lock(mutex);
         queue.push({target,string});
         cond_var.notify_one();

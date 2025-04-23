@@ -1,5 +1,5 @@
 #pragma once
-namespace log{
+namespace cvk::log{
     enum class to{
         main
     };

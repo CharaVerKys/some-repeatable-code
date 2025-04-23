@@ -18,15 +18,15 @@ public:
         logDir = std::move(p);
     }
     void init(){
-        cvk::flat_map<log::to, std::shared_ptr<std::ofstream>> streams;
+        cvk::flat_map<cvk::log::to, std::shared_ptr<std::ofstream>> streams;
         std::string time = __getStringFromCurrentTime(false);
-        streams.insert(log::to::main, std::make_shared<std::ofstream>(logDir / (time+"_main.log"),std::ios::app));
+        streams.insert(cvk::log::to::main, std::make_shared<std::ofstream>(logDir / (time+"_main.log"),std::ios::app));
         if(errno not_eq 0){
             std::cerr << "error during logging: " << std::strerror(errno) << "\nduring try create main log file on path: " << logDir.string() <<"\n"; 
         }
         impl.start(streams);
     }
-    inline void __push(const log::to &target, const std::string &string){
+    inline void __push(const cvk::log::to &target, const std::string &string){
         impl.push(target, string);
     }
     void exit(){
