@@ -87,7 +87,7 @@ public:
         keys.insert(keys.begin()+index, key);
     }
     void remove(const K& key){
-        if(keys.empty()){throw std::runtime_error("flat_map is empty, nothing to remove");}
+        if(keys.empty()){throw std::out_of_range("flat_map is empty, nothing to remove");}
         auto opt = binarySearch(key);
         if(not opt){
             throw std::out_of_range("no value with this key");
