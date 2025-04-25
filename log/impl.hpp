@@ -28,7 +28,8 @@ struct log_impl{
             while(not queue.empty()){
                 const auto& pair = queue.front();
                                 // ? probably main log (should be first)
-                *streams.at_tryFirst(1, pair.first) << pair.second;
+                *streams.at_tryFirst(1, pair.first) << pair.second << std::flush;
+                assert(streams.at_tryFirst(1, pair.first)->good());
                 if(errno not_eq 0){
                     std::cerr << "error during logging: " << std::strerror(errno) << "\n"; 
                 }

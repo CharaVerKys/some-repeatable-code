@@ -1,6 +1,5 @@
 #pragma once
 #include <coroutine>
-#include <iostream>
 namespace cvk{
 struct co_getHandle
 {
@@ -47,3 +46,31 @@ struct std::coroutine_traits<cvk::coroutine_t, Args...> {
         }
     };
 };
+
+#if __has_include(<asio/io_context.hpp>)
+#include <asio/io_context.hpp>
+#include "asio/post.hpp"
+#if USE_CHECK_THREAD_ASIO_IN_SWITCH_CONTEXT 
+    #include CHECK_THREAD_HEADER
+#endif
+namespace cvk::details{
+struct MoveToAsioThreadAwaiter : std::suspend_always {
+    MoveToAsioThreadAwaiter(asio::io_context& ctx)
+        : ctx_(ctx) {}
+
+    void await_suspend(std::coroutine_handle<> handle) const {
+        #if USE_CHECK_THREAD_ASIO_IN_SWITCH_CONTEXT 
+        checkThreadIsNOT(&asioThreadID);
+        #endif
+        asio::post(ctx_, [handle]() mutable {
+            handle.resume();
+            #if USE_CHECK_THREAD_ASIO_IN_SWITCH_CONTEXT 
+            checkThread(&asioThreadID);
+            #endif
+        });
+    }
+private:
+    asio::io_context& ctx_;
+};
+}
+#endif

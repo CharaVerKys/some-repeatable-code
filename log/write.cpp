@@ -6,7 +6,7 @@ cvk::write::write(const log::to& target,
     : target(target){
     std::string file = loc.file_name();
     
-    context << '#' << ++totalOrder << ' ' << Logger::__getStringFromCurrentTime(true) << " in func"<< loc.function_name() 
+    context << '#' << ++totalOrder << ' ' << Logger::__getStringFromCurrentTime(true) << " in func "<< loc.function_name() 
         << " in file " << file.substr(file.find_last_of('/')+1) << " -> \n\t";
 }
 
