@@ -10,6 +10,17 @@ namespace cvk{
         void unlock() {
             flag.clear(std::memory_order_release);
         }
+
+        template <typename Rep, typename Period>
+        bool lock_for(const std::chrono::duration<Rep, Period>& timeout_duration) {
+            auto start = std::chrono::steady_clock::now();
+            while (flag.test_and_set(std::memory_order_acquire)) {
+                if (std::chrono::steady_clock::now() - start >= timeout_duration) {
+                    return false;
+                }
+            }
+            return true;
+        }
     };
 
     class locker{
@@ -30,4 +41,38 @@ namespace cvk{
             unlocked = true;
         }
     };
+
+   ///
+   ///
+
+    class external_lock{
+        std::atomic_bool locked = false;
+      public:
+        void lock() {
+            locked.store(true,std::memory_order_relaxed);
+            while(locked.load(std::memory_order_relaxed));
+            std::atomic_thread_fence(std::memory_order_acquire);
+        }
+        void unlock() {
+            cussert(locked.load(std::memory_order_relaxed));
+            locked.store(false,std::memory_order_release);
+        }
+
+        template <typename Rep, typename Period>
+        bool lock_for(const std::chrono::duration<Rep, Period>& timeout_duration) {
+            locked.store(true,std::memory_order_relaxed);
+            auto start = std::chrono::steady_clock::now();
+            while(locked.load(std::memory_order_relaxed)){
+                if (std::chrono::steady_clock::now() - start >= timeout_duration) {
+                    std::atomic_thread_fence(std::memory_order_acquire); // shall be no-op because data fetch failed
+                    return false;
+                }
+            }
+            std::atomic_thread_fence(std::memory_order_acquire);
+            return true;
+        }
+    };
+
+
+
 }
