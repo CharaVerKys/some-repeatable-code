@@ -19,14 +19,14 @@ public:
     }
     void init(){
         cvk::flat_map<cvk::log::to, std::shared_ptr<std::ofstream>> streams;
-        std::string time = __getStringFromCurrentTime(false);
+        std::string time = private_getStringFromCurrentTime(false);
         streams.insert(cvk::log::to::main, std::make_shared<std::ofstream>(logDir / (time+"_main.log"),std::ios::app));
         if(errno not_eq 0){
             std::cerr << "error during logging: " << std::strerror(errno) << "\nduring try create main log file on path: " << logDir.string() <<"\n"; 
         }
         impl.start(streams);
     }
-    inline void __push(const cvk::log::to &target, const std::string &string){
+    inline void private_push(const cvk::log::to &target, const std::string &string){
         impl.push(target, string);
     }
     void exit(){
@@ -34,10 +34,10 @@ public:
         if(impl.queue.empty()){
             return;
         }
-        std::ofstream exitStream(logDir / (__getStringFromCurrentTime(false) + "_exit.log"));
+        std::ofstream exitStream(logDir / (private_getStringFromCurrentTime(false) + "_exit.log"));
         impl.remainsOnExit(exitStream);
     }
-    inline static std::string __getStringFromCurrentTime(bool forLog) {
+    inline static std::string private_getStringFromCurrentTime(bool forLog) {
         auto now = std::chrono::system_clock::now();
         std::time_t now_c = std::chrono::system_clock::to_time_t(now);
         const std::tm *tm = std::localtime(&now_c);
