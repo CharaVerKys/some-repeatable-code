@@ -11,3 +11,6 @@ namespace cvk::log{
         critical
     };
 }
+// ? if conflict, comment this and define yourself, or use full namespace
+using clt = cvk::log::to;
+using cll = cvk::log::lvl;
