@@ -48,7 +48,7 @@ inline void checkThread(int count...)
 {
     va_list args;
     assert(count>=1);
-    uint8_t allCount = count;
+    uint8_t allCount = (uint8_t)count;
     va_start(args, count); // warning by clang: UB if count have type uint8_t or uint16_t (1/2 bytes), Ok if uint // idk why
     bool was_eq = false;
     while(count){
