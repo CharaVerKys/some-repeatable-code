@@ -20,6 +20,7 @@ public:
     void init(){
         cvk::flat_map<cvk::log::to, std::shared_ptr<std::ofstream>> streams;
         std::string time = private_getStringFromCurrentTime(false);
+        errno = 0;
         streams.insert(cvk::log::to::main, std::make_shared<std::ofstream>(logDir / (time+"_main.log"),std::ios::app));
         if(errno not_eq 0){
             std::cerr << "error during logging: " << std::strerror(errno) << "\nduring try create main log file on path: " << logDir.string() <<"\n"; 

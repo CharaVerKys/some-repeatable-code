@@ -3,8 +3,13 @@
 #include "logenum.hpp"
 #include <cassert>
 #include <cstring>
-#include <source_location>
 #include <sstream>
+
+//#if __has_include and etc...
+#include <experimental/source_location>
+namespace std{
+using source_location = std::experimental::source_location;
+}
 
 namespace cvk{
 class write{
@@ -13,6 +18,8 @@ class write{
     const log::to& target;
     inline static uint totalOrder = 0;
     log::lvl lvl = log::lvl::norm;
+    write(write&&) = delete; // nah i made broken shit, prevent other errors at this lvl
+    write(write const&) = delete;
 public:
     explicit write(const log::to& target,
         const std::source_location loc = std::source_location::current()
