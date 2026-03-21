@@ -54,7 +54,7 @@ public:
    
     // ! if future is ready will call callback immediately
     // ? use force async if you want to be sure op is async
-    void subscribe(std::function<void(tl::expected<T,std::exception_ptr>&&)>callback, const asio::io_context& context, bool forceAsync = false){
+    void subscribe(std::function<void(tl::expected<T,std::exception_ptr>&&)>callback, asio::io_context& context, bool forceAsync = false){
         if(not state_){throw std::logic_error("use moved future");}
         std::unique_lock lock(state_->mutex_);
         if(state_->used_){throw std::logic_error("future use second time");}
@@ -63,12 +63,13 @@ public:
             if(not forceAsync){
                 callback(std::move(state_->expected_));
             }else{ // ? force async operation
-                asio::post(*const_cast<asio::io_context*>(&context),
+                asio::post(context,
                 [callback = std::move(state_->callback_),
                 expected = std::move(state_->expected_)]() mutable{
                     callback(std::move(expected));
                 });
-            }return;
+            }
+            return;
         }
         state_->context_ = &context;
         state_->callback_ = std::move(callback);
@@ -220,7 +221,7 @@ requires std::is_invocable_r<cvk::future<T>, F, C, Args...>::value
 private:
     cvk::future<T> future;
     tl::expected<T,std::exception_ptr> result;
-    const asio::io_context* context = nullptr;
+    asio::io_context* context = nullptr;
 };
 }//? namespace cvk
 
